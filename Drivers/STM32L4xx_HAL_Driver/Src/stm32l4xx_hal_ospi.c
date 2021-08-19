@@ -2496,7 +2496,7 @@ HAL_StatusTypeDef HAL_OSPIM_Config(OSPI_HandleTypeDef *hospi, OSPIM_CfgTypeDef *
   /* Check the parameters of the OctoSPI IO Manager configuration structure */
   assert_param(IS_OSPIM_PORT(cfg->ClkPort));
   assert_param(IS_OSPIM_DQS_PORT(cfg->DQSPort));
-  assert_param(IS_OSPIM_PORT(cfg->NCSPort));
+  assert_param(IS_OSPIM_CS_PORT(cfg->NCSPort));
   assert_param(IS_OSPIM_IO_PORT(cfg->IOLowPort));
   assert_param(IS_OSPIM_IO_PORT(cfg->IOHighPort));
 #if   defined (OCTOSPIM_CR_MUXEN)
@@ -2587,9 +2587,11 @@ HAL_StatusTypeDef HAL_OSPIM_Config(OSPI_HandleTypeDef *hospi, OSPIM_CfgTypeDef *
 #endif
 
     /********************* Deactivation of other instance *********************/
-    if ((cfg->ClkPort == IOM_cfg[other_instance].ClkPort) || (cfg->DQSPort == IOM_cfg[other_instance].DQSPort)     ||
-        (cfg->NCSPort == IOM_cfg[other_instance].NCSPort) || (cfg->IOLowPort == IOM_cfg[other_instance].IOLowPort) ||
-        (cfg->IOHighPort == IOM_cfg[other_instance].IOHighPort))
+    if (((cfg->ClkPort != 0) && (cfg->ClkPort == IOM_cfg[other_instance].ClkPort)) ||
+        ((cfg->DQSPort != 0) && (cfg->DQSPort == IOM_cfg[other_instance].DQSPort)) ||
+        ((cfg->NCSPort != 0) && (cfg->NCSPort == IOM_cfg[other_instance].NCSPort)) ||
+        ((cfg->IOLowPort != HAL_OSPIM_IOPORT_NONE) && (cfg->IOLowPort == IOM_cfg[other_instance].IOLowPort)) ||
+        ((cfg->IOHighPort != HAL_OSPIM_IOPORT_NONE) && (cfg->IOHighPort == IOM_cfg[other_instance].IOHighPort)))
     {
 #if   defined (OCTOSPIM_CR_MUXEN)
       if ((cfg->ClkPort   == IOM_cfg[other_instance].ClkPort)   && (cfg->DQSPort    == IOM_cfg[other_instance].DQSPort) &&
@@ -2621,7 +2623,9 @@ HAL_StatusTypeDef HAL_OSPIM_Config(OSPI_HandleTypeDef *hospi, OSPIM_CfgTypeDef *
     }
 
     /******************** Activation of new configuration *********************/
-    MODIFY_REG(OCTOSPIM->PCR[(cfg->NCSPort-1U)], (OCTOSPIM_PCR_NCSEN | OCTOSPIM_PCR_NCSSRC), (OCTOSPIM_PCR_NCSEN | (instance << OCTOSPIM_PCR_NCSSRC_Pos)));
+    if (cfg->NCSPort != 0U) {
+      MODIFY_REG(OCTOSPIM->PCR[(cfg->NCSPort-1U)], (OCTOSPIM_PCR_NCSEN | OCTOSPIM_PCR_NCSSRC), (OCTOSPIM_PCR_NCSEN | (instance << OCTOSPIM_PCR_NCSSRC_Pos)));
+    }
 
 #if   defined (OCTOSPIM_CR_MUXEN)
     if ((cfg->Req2AckTime - 1U) > ((OCTOSPIM->CR & OCTOSPIM_CR_REQ2ACK_TIME) >> OCTOSPIM_CR_REQ2ACK_TIME_Pos))

@@ -1014,6 +1014,8 @@ HAL_StatusTypeDef     HAL_OSPIM_Config              (OSPI_HandleTypeDef *hospi, 
 
 #define IS_OSPIM_DQS_PORT(NUMBER)          ((NUMBER) <= 2U)
 
+#define IS_OSPIM_CS_PORT(NUMBER)           ((NUMBER) <= 2U)
+
 #define IS_OSPIM_IO_PORT(PORT)             (((PORT) == HAL_OSPIM_IOPORT_NONE)  || \
                                             ((PORT) == HAL_OSPIM_IOPORT_1_LOW)  || \
                                             ((PORT) == HAL_OSPIM_IOPORT_1_HIGH) || \
